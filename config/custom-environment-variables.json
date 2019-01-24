@@ -1,3 +1,4 @@
 {
-    "jwtPrivateKey": "brunch_jwtPrivateKey"
+    "jwtPrivateKey": "brunch_jwtPrivateKey",
+    "db_connection":"db_connection"
 }
