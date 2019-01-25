@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const config = require('config');
+mongoose.set("useCreateIndex", true);
 const db = function(){
     if(!config.get("db_connection")){
         console.log("db_connection environment varaible is not set");
