@@ -16,7 +16,8 @@ const detailSchema = new mongoose.Schema({
         required: true,
         unique: true,
         minlength: 5,
-        maxlength: 255
+        maxlength: 255,
+        lowercase : true,
     },
     address: {
         type: String,

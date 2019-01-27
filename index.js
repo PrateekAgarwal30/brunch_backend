@@ -10,7 +10,12 @@ if (!config.get("jwtPrivateKey")) {
     process.exit(1);
 }
 app.get('/', auth, (req, res) => {
-    res.status(200).send("Connected Successfully");
+    res
+      .status(200)
+      .send({
+        _status: "success",
+        _message: "Connected Successfully"
+      });
 });
 require("./start_up/routes")(app);
 const port = process.env.port || 3500;
