@@ -19,7 +19,8 @@ const userSchema = new mongoose.Schema({
     },
     details : {
         type : mongoose.Types.ObjectId,
-        required : true
+        required : true,
+        ref : 'details'
     }
 });
 userSchema.methods.generateAuthToken = function(){
