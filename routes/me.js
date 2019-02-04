@@ -7,7 +7,7 @@ router.get('/', async (req, res) => {
     const jwtToken = req.get('x-auth-token')
     try {
         let user = jwt.verify(jwtToken, config.get('jwtPrivateKey'));
-        user = await User.findById(user._id).populate('details',"-_id");
+        user = await User.findById(user._id).populate('details',"-_id","-password");
         res.status(200).send({
             _status: "success",
             _data: user
