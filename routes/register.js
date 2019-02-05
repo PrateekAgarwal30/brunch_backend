@@ -8,7 +8,7 @@ const _ = require("lodash");
 const Fawn = require("fawn");
 Fawn.init(mongoose);
 router.post("/", async (req, res) => {
-  console.log("Post");
+  console.log("Post - REGISTER");
   const { error } = validateUser(_.pick(req.body, ["email", "password"]));
   if (error) {
     return res.status(400).send({
