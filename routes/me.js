@@ -8,7 +8,9 @@ router.get('/', auth,async (req, res) => {
     const jwtToken = req.get('x-auth-token')
     try {
         let user = jwt.verify(jwtToken, config.get('jwtPrivateKey'));
-        user = await User.findById(user._id, "-password").populate('details',"-_id");
+        user = await User.findById(user._id, "-__v -password")
+          .populate("details", "-__v -_id")
+            .populate("addresses","-__v");
         res.status(200).send({
             _status: "success",
             _data: user

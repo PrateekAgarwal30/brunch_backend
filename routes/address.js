@@ -50,7 +50,7 @@ router.post("/", auth, async (req, res) => {
       "contact",
       "tag"
     ]));
-    user.a = newAddress._id;
+    user.addresses.push(newAddress._id);
     await newAddress.save();
     await user.save();
     res.status(200).send({
