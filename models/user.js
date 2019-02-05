@@ -18,10 +18,14 @@ const userSchema = new mongoose.Schema({
         maxlength: 1024
     },
     details : {
-        type : mongoose.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         required : true,
         ref : 'details'
-    }
+    },
+    addresses : [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref : 'addresses'
+    }]
 });
 userSchema.methods.generateAuthToken = function(){
     console.log("jwtPrivateKey : ", config.get('jwtPrivateKey'));
