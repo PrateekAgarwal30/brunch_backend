@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
         unique: true,
         minlength: 5,
         maxlength: 255,
-        lowercase : true
+        lowercase: true
     },
     password: {
         type: String,
@@ -17,17 +17,17 @@ const userSchema = new mongoose.Schema({
         minlength: 5,
         maxlength: 1024
     },
-    details : {
+    details: {
         type: mongoose.Schema.Types.ObjectId,
-        required : true,
-        ref : 'details'
+        required: true,
+        ref: 'details'
     },
-    addresses : [{
+    addresses: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref : 'addresses'
+        ref: 'addresses'
     }]
 });
-userSchema.methods.generateAuthToken = function(){
+userSchema.methods.generateAuthToken = function () {
     console.log("jwtPrivateKey : ", config.get('jwtPrivateKey'));
     const token = jwt.sign({ _id: this._id }, config.get('jwtPrivateKey'));
     return token;
@@ -42,6 +42,23 @@ function validateUser(user) {
     return Joi.validate(user, schema);
 }
 
-
+function changePasswordValidation(data) {
+    const schema = {
+        oldp: Joi.string()
+            .min(5)
+            .max(1024)
+            .required(),
+        confirmp: Joi.string()
+            .min(5)
+            .max(1024)
+            .required(),
+        newp: Joi.string()
+            .min(5)
+            .max(1024)
+            .required()
+    };
+    return Joi.validate(data, schema);
+}
 exports.User = User;
 exports.validateUser = validateUser;
+exports.changePasswordValidation = changePasswordValidation;
