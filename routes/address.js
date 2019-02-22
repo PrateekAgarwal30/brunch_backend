@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const mongoose = require("mongoose");
 const auth = require("../middleware/auth");
 const { Address, validateAddress } = require("../models/addresses");
 const { User } = require("../models/user");
@@ -11,6 +10,8 @@ router.get("/", auth, async (req, res) => {
     const user = await User.findById(req.userId, "-password").populate(
       "details",
       "-_id"
+    ).populate(
+      "addresses"
     );
     res.status(200).send({
       _status: "success",
@@ -42,7 +43,12 @@ router.post("/", auth, async (req, res) => {
       });
     };
     let user = await User.findById(req.userId);
-    console.log(user);
+    if(!user){
+      return res.status(400).send({
+        _status: "fail",
+        _message: "Invalid User"
+      });
+    }
     const newAddress = new Address(_.pick(req.body, [
       "address1",
       "address2",
@@ -51,11 +57,16 @@ router.post("/", auth, async (req, res) => {
       "tag"
     ]));
     user.addresses.push(newAddress._id);
-    await newAddress.save();
-    await user.save();
+
+    await Fawn.Task()
+      .save("addresses", newAddress)
+      .update("users", { _id: user._id }, { addresses :user.addresses})
+      .run()
+    // await newAddress.save();
+    // await user.save();
     res.status(200).send({
       _status: "success",
-      _data: {newAddress,user}
+      _data: { newAddress, user }
     });
   } catch (ex) {
     res.status(400).send({
