@@ -17,19 +17,9 @@ const detailSchema = new mongoose.Schema({
         unique: true,
         minlength: 5,
         maxlength: 255,
-        lowercase : true,
+        lowercase: true,
     },
-    address: {
-        type: String,
-        minlength: 5,
-        maxlength: 255
-    },
-    city: {
-        type: String,
-        minlength: 3,
-        maxlength: 20
-    },
-    state: {
+    location: {
         type: String,
         minlength: 3,
         maxlength: 20
@@ -42,6 +32,17 @@ const detailSchema = new mongoose.Schema({
             validator: function (v) { return +v > 0; },
             message: 'Invalid Mobile Number'
         }
+    },
+    dateOfBirth: {
+        type: Date
+    },
+    preferredMeal: {
+        type: String,
+        enum: ["Veg", "Non-Veg", ""]
+    },
+    description: {
+        type: String,
+        maxlength: 150
     }
 });
 const Detail = mongoose.model("details", detailSchema);
@@ -61,18 +62,40 @@ function validateDetails(detail) {
             .max(255)
             .required()
             .email(),
-        address: Joi.string()
-            .min(5)
-            .max(511),
-        city: Joi.string()
+        location: Joi.string()
             .min(3)
-            .max(20),
-        state: Joi.string()
-            .ming(3)
             .max(20)
+        ,
+        phoneNumber: Joi.string().min(10).max(10),
+        dateOfBirth: Joi.date(),
+        preferredMeal: Joi.string(),
+        description: Joi.string().min(5).max(150)
     };
     return Joi.validate(detail, schema);
 }
 
+
+function validateUpdateDetails(detail) {
+    const schema = {
+        firstName: Joi.string()
+            .min(3)
+            .max(50),
+        lastName: Joi.string()
+            .min(3)
+            .max(50),
+        phoneNumber: Joi.string()
+            .length(10),
+        location: Joi.string()
+            .min(3)
+            .max(20)
+        ,
+        phoneNumber: Joi.string().min(10).max(10),
+        dateOfBirth: Joi.date(),
+        preferredMeal: Joi.string(),
+        description: Joi.string().min(5).max(150)
+    };
+    return Joi.validate(detail, schema);
+}
 exports.Detail = Detail;
 exports.validateDetails = validateDetails;
+exports.validateUpdateDetails = validateUpdateDetails;
