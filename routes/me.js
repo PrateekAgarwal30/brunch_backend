@@ -32,38 +32,37 @@ router.post('/details', auth, async (req, res) => {
             "dateOfBirth",
             "preferredMeal",
             "description"]);
+        const keys = Object.keys(mDetails);
+        keys.map((x)=>{
+            if (mDetails[x]===null){
+                delete mDetails[x];
+            }
+        })
+        console.log(mDetails);
         console.log("Post - Details");
         const { error } = validateUpdateDetails(mDetails);
         if (error) {
-            return res.status(400).send({
-                _status: "fail",
-                _message: error.details[0].message
-            });
+            if (error.details[0].message === 'firstName" is not allowed to be empty'){
+                return res.status(400).send({
+                    _status: "fail",
+                    _message: "First Name is required"
+                });
+            }else{
+                return res.status(400).send({
+                    _status: "fail",
+                    _message: error.details[0].message
+                });
+            }
+
         };
         let user = await User.findById(req.userId).select("details");
         if (user.details) {
             let details = await Detail.findById(user.details);
-            if (mDetails.firstName) {
-                details.firstName = mDetails.firstName
-            }
-            if (mDetails.lastName) {
-                details.lastName = mDetails.lastName
-            }
-            if (mDetails.phoneNumber) {
-                details.phoneNumber = mDetails.phoneNumber
-            }
-            if (mDetails.location) {
-                details.location = mDetails.location
-            }
-            if (mDetails.dateOfBirth) {
-                details.dateOfBirth = mDetails.dateOfBirth
-            }
-            if (mDetails.preferredMeal) {
-                details.preferredMeal = mDetails.preferredMeal
-            }
-            if (mDetails.description) {
-                details.description = mDetails.description
-            }
+            keys.map((x) => {
+                if (mDetails[x]) {
+                    details[x] = mDetails[x];
+                }
+            });
             console.log(details);
             await details.save();
             res.status(200).send({
