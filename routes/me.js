@@ -65,9 +65,10 @@ router.post('/details', auth, async (req, res) => {
             });
             console.log(details);
             await details.save();
+            console.log(details)
             res.status(200).send({
                 _status: "success",
-                _data: { details }
+                _data: details
             });
         }
     } catch (ex) {
