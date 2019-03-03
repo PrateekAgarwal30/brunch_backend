@@ -39,9 +39,8 @@ const addressSchema = new mongoose.Schema({
         type: String,
         required: true
     }
-
 });
-const Address = mongoose.model("addresses", addressSchema);
+const Address = mongoose.model("tech_parks", addressSchema);
 function validateLocation(location) {
     const schema = {
         tag: Joi.string().min(5).max(64).required(),
