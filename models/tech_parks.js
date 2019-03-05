@@ -9,7 +9,10 @@ const locationSchema = new mongoose.Schema({
         type: Object,
         required: true,
         validate: {
-            validator: function (v) { return (v.latitude != null && v.latitude != undefined && v.longitude != null && v.longitude != undefined) },
+            validator: function (v) { 
+                console.log(v);
+                return (v.latitude != null && v.latitude != undefined && v.longitude != null && v.longitude != undefined && +v.longitude != NaN && +v.latitude != NaN) 
+            },
             message: 'Invalid Location'
         }
     }
@@ -26,7 +29,18 @@ const addressSchema = new mongoose.Schema({
         minlength: 5,
         maxlength: 64
     },
-    locations: [locationSchema],
+    tPark_location : {
+        type: Object,
+        required: true,
+        validate: {
+            validator: function (v) { return (v.latitude != null && v.latitude != undefined && v.longitude != null && v.longitude != undefined && +v.longitude != NaN && +v.latitude != NaN) },
+            message: 'Invalid Location'
+        }
+    },
+    stall_locations: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'stall_locations'
+    }],
     address: {
         type: String,
         required: true,
@@ -41,6 +55,7 @@ const addressSchema = new mongoose.Schema({
     }
 });
 const Address = mongoose.model("tech_parks", addressSchema);
+const StallLocation = mongoose.model("stall_locations", locationSchema);
 function validateLocation(location) {
     const schema = {
         tag: Joi.string().min(5).max(64).required(),
@@ -52,7 +67,7 @@ function validateAddress(address) {
     const schema = {
         techPark: Joi.string().min(5).max(64).required(),
         company: Joi.string().min(5).max(64),
-        locations: Joi.array().required(),
+        tPark_location: Joi.object().required(),
         address: Joi.string().min(5).max(150).required(),
         area: Joi.string().min(5).max(64).required(),
         city: Joi.string().min(3).max(64).required()
@@ -62,5 +77,6 @@ function validateAddress(address) {
 
 
 exports.Address = Address;
+exports.StallLocation = StallLocation;
 exports.validateAddress = validateAddress;
 exports.validateLocation = validateLocation;
