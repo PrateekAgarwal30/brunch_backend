@@ -20,7 +20,7 @@ app.get('/', auth, (req, res) => {
       });
 });
 require("./start_up/routes")(app);
-const port = process.env.port || 3500;
-app.listen(port, () => {
-    console.log(`Listening at Port : ${port}`);
-})
+app.set( 'port', ( process.env.PORT || 5000 ));
+app.listen( app.get( 'port' ), function() {
+  console.log( 'Node server is running on port ' + app.get( 'port' ));
+  });
