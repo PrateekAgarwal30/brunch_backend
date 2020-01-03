@@ -7,7 +7,7 @@ const _ = require("lodash");
 router.get('/', auth, async (req, res) => {
     try {
         console.log(req.userId);
-        user = await User.findById(req.userId, "-__v -password")
+        let user = await User.findById(req.userId, "-__v -password")
             .populate("details", "-__v -_id")
             .populate("addresses", "-__v");
         res.status(200).send({
