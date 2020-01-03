@@ -1,4 +1,4 @@
 {
-  "jwtPrivateKey": "",
-  "db_connection" : "mongodb://localhost:27017/brunch"
+  "db_connection1" : "mongodb://localhost:27017/brunch",
+  "db_connection" : "mongodb+srv://brunch:brunch123@cluster0-qiqfz.mongodb.net/test?retryWrites=true&w=majority"
 }

@@ -1,9 +1,9 @@
 const express = require('express');
 const auth = require("./middleware/auth");
 const app = express();
-const logger = require('express-logger');
+// const logger = require('express-logger');
 app.use(express.json());
-app.use(logger({ path: "logfile.log" }));
+// app.use(logger({ path: "logfile.log" }));
 require('./start_up/db')();
 const config = require("config");
 if (!config.get("jwtPrivateKey")) {
