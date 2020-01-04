@@ -1,0 +1,22 @@
+[{
+    "techPark": "Embassy Tech Village",
+    "tPark_location" : {
+    	"latitude" : 12.9304642,
+    	"longitude" : 77.6890912
+    },
+    "address" : "Embassy Tech Village Rd , Devarabisanahalli",
+    "area" : "Bellandur",
+    "city" : "Bangalore"
+    
+},
+{
+    "techPark": "Mantri Commercio",
+    "tPark_location" : {
+    	"latitude" : 12.9323498,
+    	"longitude" : 77.6815118
+    },
+    "address" : "Near Sakra World Hospital , Devarabisanahalli",
+    "area" : "Bellandur",
+    "city" : "Bangalore"
+    
+}]

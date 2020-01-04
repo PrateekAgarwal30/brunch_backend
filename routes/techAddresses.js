@@ -40,8 +40,8 @@ router.post("/", auth, async (req, res) => {
         _status: "fail",
         _message: error.details[0].message
       });
-    };
-    newAddress = new Address({ ...addAddress, stall_locations:[]});
+    }
+    const newAddress = new Address({ ...addAddress, stall_locations:[]});
     // await Fawn.Task()
     //   .save("tech_parks", newAddress)
     //   .run()
@@ -73,7 +73,7 @@ router.post("/location", auth, async (req, res) => {
         _status: "fail",
         _message: error.details[0].message
       });
-    };
+    }
 
     let tech_park = await Address.findById(req.body.tech_park_id);
     if (!tech_park) {
