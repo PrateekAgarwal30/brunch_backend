@@ -14,7 +14,7 @@ const mealSchema = new mongoose.Schema({
     },
     type : {
         type : String,
-        enum : ['veg','nonveg'],
+        enum : ['veg','nonVeg'],
         required : true
     },
     price : {
