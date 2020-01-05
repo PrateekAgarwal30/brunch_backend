@@ -50,8 +50,7 @@ router.post("/", auth, async (req, res) => {
       "tech_park_id",
       "stall_loc_id",
     ]));
-    user.addresses.push(newAddress._id);
-
+    user.addresses = (newAddress._id);
     await Fawn.Task()
       .save("addresses", newAddress)
       .update("users", { _id: user._id }, { addresses :user.addresses})

@@ -22,10 +22,10 @@ const userSchema = new mongoose.Schema({
         required: true,
         ref: 'details'
     },
-    addresses: [{
+    addresses: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'addresses'
-    }]
+    }
 });
 userSchema.methods.generateAuthToken = function () {
     console.log("jwtPrivateKey : ", config.get('jwtPrivateKey'));
