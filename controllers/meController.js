@@ -98,7 +98,7 @@ const postUserImage = async (req, res) => {
   if (!avatarFile) {
     response = {
       _status: "fail",
-      message: "Unsupported file."
+      _message: "Unsupported file."
     };
     return res.status(400).send(response);
   } else {
