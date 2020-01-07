@@ -1,26 +1,26 @@
-const express = require('express');
+const express = require("express");
 const auth = require("./middleware/auth");
 const app = express();
 // const logger = require('express-logger');
+app.use("/uploads", express.static("uploads"));
 app.use(express.json());
 // app.use(logger({ path: "logfile.log" }));
-require('./start_up/db')();
+require("./start_up/db")();
 const config = require("config");
 if (!config.get("jwtPrivateKey")) {
-    console.log("jwtPrivateKey environment varaible is not set");
-    //set brunch_jwtPrivateKey=12345 in cmd
-    process.exit(1);
+  console.log(
+    "jwtPrivateKey environment varaible is not set \n set brunch_jwtPrivateKey=12345 in cmd"
+  );
+  process.exit(1);
 }
-app.get('/', auth, (req, res) => {
-    res
-      .status(200)
-      .send({
-        _status: "success",
-        _message: "Connected Successfully"
-      });
+app.get("/", auth, (req, res) => {
+  res.status(200).send({
+    _status: "success",
+    _message: "Connected Successfully"
+  });
 });
 require("./start_up/routes")(app);
-app.set( 'port', ( process.env.PORT || 5000 ));
-app.listen( app.get( 'port' ), function() {
-  console.log( 'Node server is running on port ' + app.get( 'port' ));
-  });
+app.set("port", process.env.PORT || 5000);
+app.listen(app.get("port"), function() {
+  console.log("Node server is running on port " + app.get("port"));
+});

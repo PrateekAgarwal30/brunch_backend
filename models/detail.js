@@ -45,6 +45,9 @@ const detailSchema = new mongoose.Schema({
   description: {
     type: String,
     maxlength: 150
+  },
+  userImageUrl: {
+    type: String
   }
 });
 const Detail = mongoose.model("details", detailSchema);
