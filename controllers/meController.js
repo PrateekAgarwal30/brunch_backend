@@ -1,9 +1,10 @@
 const { User } = require("../models/user");
 const { Detail, validateUpdateDetails } = require("../models/detail");
 const _ = require("lodash");
+const fs = require("fs").promises;
 const getUserDetails = async (req, res) => {
   try {
-    console.log(req.userId);
+    // console.log(req.userId);
     let user = await User.findById(req.userId, "-__v -password")
       .populate("details", "-__v -_id")
       .populate({
@@ -30,7 +31,7 @@ const getUserDetails = async (req, res) => {
       _message: ex.message
     });
   }
-}
+};
 
 const postUserDetails = async (req, res) => {
   try {
@@ -49,8 +50,8 @@ const postUserDetails = async (req, res) => {
         delete mDetails[x];
       }
     });
-    console.log(mDetails);
-    console.log("Post - Details");
+    // console.log(mDetails);
+    // console.log("Post - Details");
     const { error } = validateUpdateDetails(mDetails);
     if (error) {
       if (
@@ -75,9 +76,9 @@ const postUserDetails = async (req, res) => {
           details[x] = mDetails[x];
         }
       });
-      console.log(details);
+      // console.log(details);
       await details.save();
-      console.log(details);
+      // console.log(details);
       res.status(200).send({
         _status: "success",
         _data: details
@@ -89,8 +90,42 @@ const postUserDetails = async (req, res) => {
       _message: ex.message
     });
   }
-}
+};
+
+const postUserImage = async (req, res) => {
+  const avatarFile = _.get(req, "file", null) || null;
+  var response;
+  if (!avatarFile) {
+    response = {
+      _status: "fail",
+      message: "Unsupported file."
+    };
+    return res.status(400).send(response);
+  } else {
+    try {
+      var fileName = _.get(avatarFile, "filename");
+      let user = await User.findById(req.userId).select("details");
+      if (user.details) {
+        let details = await Detail.findById(user.details);
+        details.userImageUrl = `/uploads/avatars/${fileName}`;
+        await details.save();
+        res.status(200).send({
+          _status: "success",
+          _data: details
+        });
+        return res.status(200).send(response);
+      }
+    } catch (err) {
+      response = {
+        _status: "fail",
+        _message: err.message
+      };
+      return res.status(400).send(response);
+    }
+  }
+};
 module.exports = {
-    getUserDetails,
-    postUserDetails
+  getUserDetails,
+  postUserDetails,
+  postUserImage
 };
