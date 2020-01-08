@@ -7,13 +7,22 @@ const storage = multer.diskStorage({
     cb(null, "./uploads/avatars/");
   },
   filename: function(req, file, cb) {
-    // console.log(file);
-    cb(null, `${req.userId}.png`);
+    let fileName = "";
+    if (file.mimetype === "image/png") {
+      fileName = `${req.userId}_${Date.now().toString()}.png`;
+      cb(null, fileName);
+    } else if (file.mimetype === "image/jpeg") {
+      fileName = `${req.userId}_${Date.now().toString()}.jpg`;
+      cb(null, fileName);
+    } else {
+      cb(null, null);
+    }
   }
 });
 
 const fileFilter = function(req, file, cb) {
-  cb(null, file.mimetype === "image/png");
+  console.log("FileFilter - file", file);
+  cb(null, file.mimetype === "image/png" || file.mimetype === "image/jpeg");
 };
 const avatarUploadMiddleware = multer({
   storage: storage,
