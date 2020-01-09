@@ -1,7 +1,6 @@
 const { User } = require("../models/user");
 const { Detail, validateUpdateDetails } = require("../models/detail");
 const _ = require("lodash");
-const fs = require("fs").promises;
 const getUserDetails = async (req, res) => {
   try {
     // console.log(req.userId);
