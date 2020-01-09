@@ -43,10 +43,11 @@ const postTxn = async (req, res) => {
   }
 };
 const getTxnRes = async (req, res) => {
-  res.status(200).send({
+  const responseData = {
     _status: "success",
     _data: req.body
-  });
+  };
+  return res.render("paytm/response", { responseData });
 };
 module.exports = {
   postTxn,

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<!-- saved from url=(0039)file:///C:/Users/1021712/Desktop/a.html -->
+<html lang="en" style=" height: 100%;">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title><%= JSON.stringify(responseData) %></title>
+  <style>
+    .body-container {
+      justify-content: center;
+      align-items: center;
+      display: flex;
+      height: 100%;
+      flex-direction: column;
+    }
+
+    .imgClass {
+      width: 80px;
+      height: 80px;
+    }
+  </style>
+</head>
+
+<body style="
+    height: 100%;margin:0px">
+  <div class="body-container">
+    <% if(responseData['_status'] === 'success'){ %>
+    <img class="imgClass" src="../../public/success.png" />
+    <div style="
+    padding: 20px;
+">
+      Transaction Successful!
+    </div>
+    <% }else if(responseData['_status'] === 'fail'){ %>
+    <img class="imgClass" src="../../public/error.png" />
+    <div style="
+    padding: 20px;
+">
+      Transaction Failed.
+    </div>
+    <% } else{ %>
+    <img class="imgClass" src="../../public/error.png" />
+    <div style="
+    padding: 20px;
+">
+      Transaction Failed.
+    </div>
+    <% } %>
+  </div>
+</body>
+
+</html>
