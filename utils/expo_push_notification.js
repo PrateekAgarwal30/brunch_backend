@@ -14,8 +14,7 @@ const pushNotificationForUser = async (pushToken, body, data) => {
     const messages = [message];
     let chunks = expo.chunkPushNotifications(messages);
     for (let chunk of chunks) {
-      let ticketChunk = await expo.sendPushNotificationsAsync(chunk);
-      tickets.push(...ticketChunk);
+      await expo.sendPushNotificationsAsync(chunk);
     }
   } catch (error) {
     console.error(error);
