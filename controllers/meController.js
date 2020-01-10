@@ -123,8 +123,35 @@ const postUserImage = async (req, res) => {
     }
   }
 };
+
+const postNotifToken = async (req, res) => {
+  try {
+    const { pushNotificationToken } = req.body;
+    if (!pushNotificationToken) {
+      res.status(400).send({
+        _status: "fail"
+      });
+    }
+    let user = await User.findById(req.userId).select("details");
+    if (user.details) {
+      let details = await Detail.findById(user.details);
+      if (details["pushNotifToken"] !== pushNotificationToken) {
+        details["pushNotifToken"] = pushNotificationToken;
+        await details.save();
+      }
+      res.status(200).send({
+        _status: "success"
+      });
+    }
+  } catch (ex) {
+    res.status(400).send({
+      _status: "fail"
+    });
+  }
+};
 module.exports = {
   getUserDetails,
   postUserDetails,
-  postUserImage
+  postUserImage,
+  postNotifToken
 };

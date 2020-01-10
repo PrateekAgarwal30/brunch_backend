@@ -48,6 +48,9 @@ const detailSchema = new mongoose.Schema({
   },
   userImageUrl: {
     type: String
+  },
+  pushNotifToken: {
+    type: String
   }
 });
 const Detail = mongoose.model("details", detailSchema);

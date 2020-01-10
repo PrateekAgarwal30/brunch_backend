@@ -37,4 +37,5 @@ router.post(
   avatarUploadMiddleware.single("avatar"),
   meController.postUserImage
 );
+router.post("/pushNotificationToken", auth, meController.postNotifToken);
 module.exports = router;
