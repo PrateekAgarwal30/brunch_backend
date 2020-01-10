@@ -1,8 +1,13 @@
-const jwt = require('jsonwebtoken');
-const config = require('config');
- const auth = function (req,res,next) {
-    try {
-    const jwtToken = req.get("x-auth-token");
+const jwt = require("jsonwebtoken");
+const config = require("config");
+const auth = function(req, res, next) {
+  try {
+    let jwtToken;
+    if (req.baseUrl === "/api/txnPaytm") {
+      jwtToken = req.body["x-auth-token"];
+    } else {
+      jwtToken = req.get("x-auth-token");
+    }
     let user = jwt.verify(jwtToken, config.get("jwtPrivateKey"));
     req.userId = user._id;
     next();
@@ -12,7 +17,6 @@ const config = require('config');
       _message: ex.message
     });
   }
- };
+};
 
- module.exports = auth;
-
+module.exports = auth;
