@@ -4,6 +4,7 @@ const checksum_lib = require("../utils/paytm/checksum");
 const { pushNotificationForUser } = require("../utils/expo_push_notification");
 const { User } = require("../models/user");
 const { Detail } = require("../models/detail");
+const moment = require("moment");
 const postTxn = async (req, res) => {
   try {
     const paramlist = req.body;
@@ -48,34 +49,42 @@ const postTxn = async (req, res) => {
 };
 const getTxnRes = async (req, res) => {
   try {
-    const responseData = {
-      _status: "success",
-      _data: req.body
-    };
-    try {
-      const userId = _.get(req, "query.userId", null);
-      if (userId) {
-        let user = await User.findById(userId).select("details");
-        if (user.details) {
-          let details = await Detail.findById(user.details);
-          if (details["pushNotifToken"]) {
-            await pushNotificationForUser(
-              details["pushNotifToken"],
-              "Order Created Successfully!",
-              {}
-            );
+    const { body: bodyData } = req;
+    if (bodyData["RESPCODE"] === "01") {
+      try {
+        const userId = _.get(req, "query.userId", null);
+        if (userId) {
+          let user = await User.findById(userId).select("details");
+          if (user.details) {
+            let details = await Detail.findById(user.details);
+            if (details["pushNotifToken"]) {
+              await pushNotificationForUser(details["pushNotifToken"], {
+                title: "Order Placed Successfully!",
+                body: `Order #${
+                  bodyData.ORDERID
+                } was placed successfully (${moment(
+                  bodyData.TXNDATE
+                ).calendar()})`,
+                priority: "high",
+                sound: "default"
+              });
+            }
           }
         }
+      } catch (error) {
+        console.log(error.message);
       }
-    } catch (error) {
-      console.log(error.message);
     }
+    const responseData = {
+      _status: bodyData["RESPCODE"] === "01" ? "success" : "fail",
+      _data: bodyData
+    };
     return res.render("paytm/response", { responseData });
   } catch (err) {
     return res.render("paytm/response", {
       responseData: {
         _status: "fail",
-        _data: err.message
+        _message: err.message
       }
     });
   }
