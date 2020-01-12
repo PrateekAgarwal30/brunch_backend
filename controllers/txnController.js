@@ -5,7 +5,7 @@ const { pushNotificationForUser } = require("../utils/expo_push_notification");
 const { User } = require("../models/user");
 const { Detail } = require("../models/detail");
 const moment = require("moment");
-const postTxn = async (req, res) => {
+const postPaytmTxn = async (req, res) => {
   try {
     const paramlist = req.body;
     let params = {};
@@ -47,7 +47,7 @@ const postTxn = async (req, res) => {
     });
   }
 };
-const getTxnRes = async (req, res) => {
+const getPaytmTxnRes = async (req, res) => {
   try {
     const { body: bodyData } = req;
     if (bodyData["RESPCODE"] === "01") {
@@ -90,6 +90,6 @@ const getTxnRes = async (req, res) => {
   }
 };
 module.exports = {
-  postTxn,
-  getTxnRes
+  postPaytmTxn,
+  getPaytmTxnRes
 };

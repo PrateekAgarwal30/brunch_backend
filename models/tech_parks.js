@@ -24,7 +24,7 @@ const locationSchema = new mongoose.Schema({
     }
   }
 });
-const addressSchema = new mongoose.Schema({
+const techParkAddressSchema = new mongoose.Schema({
   techPark: {
     type: String,
     required: true,
@@ -72,7 +72,7 @@ const addressSchema = new mongoose.Schema({
     required: true
   }
 });
-const Address = mongoose.model("tech_parks", addressSchema);
+const TechParkAddress = mongoose.model("tech_parks", techParkAddressSchema);
 const StallLocation = mongoose.model("stall_locations", locationSchema);
 function validateLocation(location) {
   const schema = {
@@ -84,7 +84,7 @@ function validateLocation(location) {
   };
   return Joi.validate(location, schema);
 }
-function validateAddress(address) {
+function validateTechParkAddress(address) {
   const schema = {
     techPark: Joi.string()
       .min(5)
@@ -110,7 +110,7 @@ function validateAddress(address) {
   return Joi.validate(address, schema);
 }
 
-exports.Address = Address;
+exports.TechParkAddress = TechParkAddress;
 exports.StallLocation = StallLocation;
-exports.validateAddress = validateAddress;
+exports.validateTechParkAddress = validateTechParkAddress;
 exports.validateLocation = validateLocation;

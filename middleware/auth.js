@@ -3,7 +3,7 @@ const config = require("config");
 const auth = function(req, res, next) {
   try {
     let jwtToken;
-    if (req.baseUrl === "/api/txnPaytm") {
+    if (req.originalUrl === "/api/txn/paytm") {
       jwtToken = req.body["x-auth-token"];
     } else {
       jwtToken = req.get("x-auth-token");

@@ -40,7 +40,7 @@ const detailSchema = new mongoose.Schema({
   },
   preferredMeal: {
     type: String,
-    enum: ["veg", "nonVeg"]
+    enum: ["Veg", "NonVeg"]
   },
   description: {
     type: String,

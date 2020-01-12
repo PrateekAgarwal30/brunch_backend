@@ -1,25 +1,11 @@
 const {
-  Address,
-  validateAddress,
+  TechParkAddress,
+  validateTechParkAddress,
   validateLocation,
   StallLocation
 } = require("../models/tech_parks");
 const _ = require("lodash");
 const Fawn = require("fawn");
-const getTechParks = async (req, res) => {
-  try {
-    const addresses = await Address.find().populate("stall_locations");
-    res.status(200).send({
-      _status: "success",
-      _data: addresses
-    });
-  } catch (ex) {
-    res.status(400).send({
-      _status: "fail",
-      _message: ex.message
-    });
-  }
-};
 const postNewTechPark = async (req, res) => {
   try {
     console.log("Post - Tech Address");
@@ -31,17 +17,17 @@ const postNewTechPark = async (req, res) => {
       "area",
       "city"
     ]);
-    let { error } = validateAddress(addAddress);
+    let { error } = validateTechParkAddress(addAddress);
     if (error) {
       return res.status(400).send({
         _status: "fail",
         _message: error.details[0].message
       });
     }
-    const newAddress = new Address({ ...addAddress, stall_locations: [] });
-    // await Fawn.Task()
-    //   .save("tech_parks", newAddress)
-    //   .run()
+    const newAddress = new TechParkAddress({
+      ...addAddress,
+      stall_locations: []
+    });
     await newAddress.save();
     res.status(200).send({
       _status: "success",
@@ -66,7 +52,7 @@ const postNewStallLocationForTechPark = async (req, res) => {
       });
     }
 
-    let tech_park = await Address.findById(req.body.tech_park_id);
+    let tech_park = await TechParkAddress.findById(req.body.tech_park_id);
     if (!tech_park) {
       return res.status(400).send({
         _status: "fail",
@@ -97,7 +83,6 @@ const postNewStallLocationForTechPark = async (req, res) => {
   }
 };
 module.exports = {
-  getTechParks,
   postNewTechPark,
   postNewStallLocationForTechPark
 };

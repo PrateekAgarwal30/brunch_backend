@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const auth = require("../middleware/auth");
+
+const meController = require("./../controllers/meController");
+
 const multer = require("multer");
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {
@@ -28,7 +31,7 @@ const avatarUploadMiddleware = multer({
   storage: storage,
   fileFilter: fileFilter
 });
-const meController = require("./../controllers/meController");
+
 router.get("/", auth, meController.getUserDetails);
 router.post("/details", auth, meController.postUserDetails);
 router.post(
@@ -37,5 +40,6 @@ router.post(
   avatarUploadMiddleware.single("avatar"),
   meController.postUserImage
 );
-router.post("/pushNotificationToken", auth, meController.postNotifToken);
+router.post("/user_push_notif_token", auth, meController.postUserNotifToken);
+router.post("/user_address", auth, meController.postUserAddress);
 module.exports = router;

@@ -1,16 +1,13 @@
-const register = require('../routes/register');
-const auth = require('../routes/auth');
-const me = require("../routes/me")
-const express = require('express');
-const address = require('../routes/address');
-const techAddresses = require('../routes/techAddresses');
-const txnPaytm = require('../routes/txnPaytm');
-module.exports = function routes(app){ 
-    app.use('/api/register',register);
-    app.use('/api/auth', auth);
-    app.use("/api/me", me);
-    app.use("/api/address", address);
-    app.use("/api/tech_address", techAddresses);
-    app.use("/api/txnPaytm", txnPaytm);
-    console.log('Routes Added');
-}
+const authRoute = require("../routes/auth");
+const meRoute = require("../routes/me");
+const generalRoute = require("../routes/general");
+const txnRoute = require("../routes/txn");
+const adminRoute = require("../routes/admin");
+module.exports = function routes(app) {
+  app.use("/api/auth", authRoute);
+  app.use("/api/me", meRoute);
+  app.use("/api/general", generalRoute);
+  app.use("/api/txn", txnRoute);
+  app.use("/api/admin", adminRoute);
+  console.log("Routes Added");
+};
