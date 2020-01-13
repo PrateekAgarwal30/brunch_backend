@@ -5,6 +5,15 @@ const { pushNotificationForUser } = require("../utils/expo_push_notification");
 const { User } = require("../models/user");
 const { Detail } = require("../models/detail");
 const moment = require("moment");
+const paypal = require("paypal-rest-sdk");
+const querystring = require("querystring");
+paypal.configure({
+  mode: "sandbox", //sandbox or live
+  client_id:
+    "AQX9hsvb0pVOWHJIyPoJkFQmCIrRvilCEL-E21debqETRa8Du5xkcb_ETqE9LZEM_gJYZWAWqXwcxgOX",
+  client_secret:
+    "EOOQ4e82NxF2d_UJtVgw-WYR7KXyquS-8tGno80Wxezgcoa9k_DUdw9b1TQYluMttvDHG_o-yxOcZdLN"
+});
 const postPaytmTxn = async (req, res) => {
   try {
     const paramlist = req.body;
@@ -89,7 +98,112 @@ const getPaytmTxnRes = async (req, res) => {
     });
   }
 };
+
+const postPayPalTxn = async (req, res) => {
+  try {
+    var transactionsData = [
+      {
+        item_list: {
+          items: [
+            {
+              name: "item",
+              sku: "item",
+              price: "1.00",
+              currency: "INR",
+              quantity: 1
+            }
+          ]
+        },
+        amount: {
+          currency: "INR",
+          total: "1.00"
+        },
+        description: "This is the payment description."
+      }
+    ];
+    var create_payment_json = {
+      intent: "sale",
+      payer: {
+        payment_method: "paypal"
+      },
+      redirect_urls: {
+        return_url: encodeURI(
+          `http://localhost:5000/api/txn/paypal/status?statusPath=success&transactionsData=${JSON.stringify(
+            transactionsData
+          )}`
+        ),
+        cancel_url: encodeURI(
+          `http://localhost:5000/api/txn/paypal/status?statusPath=failed&transactionsData=${JSON.stringify(
+            transactionsData
+          )}`
+        )
+      },
+      transactions: transactionsData
+    };
+    paypal.payment.create(create_payment_json, function(error, payment) {
+      if (error) {
+        throw error;
+      } else {
+        console.log(JSON.stringify(payment, null, 2));
+        res.redirect(payment.links[1].href);
+      }
+    });
+  } catch (err) {
+    return res.status(400).send({
+      _status: "fail",
+      _message: err.message
+    });
+  }
+};
+const getPayPalTxnRes = async (req, res) => {
+  try {
+    var statusPath = req.query.statusPath;
+    if (statusPath === "success") {
+      var PayerID = req.query.PayerID;
+      var paymentId = req.query.paymentId;
+      var transactionsData = JSON.parse(req.query.transactionsData);
+      var execute_payment_json = {
+        payer_id: PayerID,
+        transactions: transactionsData
+      };
+      paypal.payment.execute(paymentId, execute_payment_json, function(
+        error,
+        payment
+      ) {
+        if (error) {
+          res.render("paypal/response", {
+            responseData: {
+              _status: "fail"
+            }
+          });
+        } else {
+          res.render("paypal/response", {
+            responseData: {
+              _status: "success",
+              _data: payment
+            }
+          });
+        }
+      });
+    } else {
+      res.render("paypal/response", {
+        responseData: {
+          _status: "fail"
+        }
+      });
+    }
+  } catch (err) {
+    res.render("paypal/response", {
+      responseData: {
+        _status: "fail"
+      }
+    });
+  }
+};
+// postPayPalTxn();
 module.exports = {
   postPaytmTxn,
-  getPaytmTxnRes
+  getPaytmTxnRes,
+  postPayPalTxn,
+  getPayPalTxnRes
 };
