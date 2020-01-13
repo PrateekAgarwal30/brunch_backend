@@ -6,13 +6,10 @@ const { User } = require("../models/user");
 const { Detail } = require("../models/detail");
 const moment = require("moment");
 const paypal = require("paypal-rest-sdk");
-const querystring = require("querystring");
 paypal.configure({
-  mode: "sandbox", //sandbox or live
-  client_id:
-    "AQX9hsvb0pVOWHJIyPoJkFQmCIrRvilCEL-E21debqETRa8Du5xkcb_ETqE9LZEM_gJYZWAWqXwcxgOX",
-  client_secret:
-    "EOOQ4e82NxF2d_UJtVgw-WYR7KXyquS-8tGno80Wxezgcoa9k_DUdw9b1TQYluMttvDHG_o-yxOcZdLN"
+  mode: config.get("PAYPAL_MODE"), //sandbox or live
+  client_id: config.get("PAYPAL_CLIENT_ID"),
+  client_secret: config.get("PAYPAL_CLIENT_SECRET")
 });
 const postPaytmTxn = async (req, res) => {
   try {
@@ -101,6 +98,7 @@ const getPaytmTxnRes = async (req, res) => {
 
 const postPayPalTxn = async (req, res) => {
   try {
+    const paramlist = req.body;
     var transactionsData = [
       {
         item_list: {
@@ -108,7 +106,7 @@ const postPayPalTxn = async (req, res) => {
             {
               name: "item",
               sku: "item",
-              price: "1.00",
+              price: paramlist["TXN_AMOUNT"],
               currency: "INR",
               quantity: 1
             }
@@ -116,7 +114,7 @@ const postPayPalTxn = async (req, res) => {
         },
         amount: {
           currency: "INR",
-          total: "1.00"
+          total: paramlist["TXN_AMOUNT"]
         },
         description: "This is the payment description."
       }
@@ -128,12 +126,16 @@ const postPayPalTxn = async (req, res) => {
       },
       redirect_urls: {
         return_url: encodeURI(
-          `http://localhost:5000/api/txn/paypal/status?statusPath=success&transactionsData=${JSON.stringify(
+          `${
+            paramlist["CALLBACK_URL"]
+          }?statusPath=success&transactionsData=${JSON.stringify(
             transactionsData
           )}`
         ),
         cancel_url: encodeURI(
-          `http://localhost:5000/api/txn/paypal/status?statusPath=failed&transactionsData=${JSON.stringify(
+          `${
+            paramlist["CALLBACK_URL"]
+          }?statusPath=failed&transactionsData=${JSON.stringify(
             transactionsData
           )}`
         )
@@ -145,7 +147,8 @@ const postPayPalTxn = async (req, res) => {
         throw error;
       } else {
         console.log(JSON.stringify(payment, null, 2));
-        res.redirect(payment.links[1].href);
+        res.render("paypal/request", { redirect_link: payment.links[1].href });
+        // res.redirect(payment.links[1].href);
       }
     });
   } catch (err) {
