@@ -6,11 +6,18 @@ const { User } = require("../models/user");
 const { Detail } = require("../models/detail");
 const moment = require("moment");
 const paypal = require("paypal-rest-sdk");
+const Razorpay = require("razorpay");
+const razorpay = new Razorpay({
+  key_id: config.get("RAZORPAY_KEY_ID"),
+  key_secret: config.get("RAZORPAY_KEY_SECRET")
+});
+
 paypal.configure({
   mode: config.get("PAYPAL_MODE"), //sandbox or live
   client_id: config.get("PAYPAL_CLIENT_ID"),
   client_secret: config.get("PAYPAL_CLIENT_SECRET")
 });
+
 const postPaytmTxn = async (req, res) => {
   try {
     const paramlist = req.body;
@@ -148,7 +155,6 @@ const postPayPalTxn = async (req, res) => {
       } else {
         console.log(JSON.stringify(payment, null, 2));
         res.render("paypal/request", { redirect_link: payment.links[1].href });
-        // res.redirect(payment.links[1].href);
       }
     });
   } catch (err) {
@@ -203,10 +209,76 @@ const getPayPalTxnRes = async (req, res) => {
     });
   }
 };
+
+const postRazorPayTax = async (req, res) => {
+  try {
+    const order = await razorpay.orders.create({
+      amount: 5000,
+      currency: "INR",
+      receipt: "dfhjbbxhbhbhbh",
+      payment_capture: 1,
+      notes: {}
+    });
+    console.log(order);
+    const responseData = {
+      key_id: config.get("RAZORPAY_KEY_ID"),
+      order_id: order.id,
+      prefill_name: "Prateek",
+      prefill_contact: "8186881920",
+      prefill_email: "prateek.agarwal.30@gmail.com",
+      notes_shipping_address: "A307,Adithi Elite, Bellandur, Bangalore",
+      callback_url: "https://localhost:5000/api/txn/razorpay/status1",
+      cancel_url: "https://localhost:5000/api/txn/razorpay/status2"
+    };
+    res.render("razorpay/request", { responseData });
+  } catch (err) {
+    return res.status(400).send({
+      _status: "fail",
+      _message: err.message
+    });
+  }
+};
+const getRazorPayTaxRes = async (req, res) => {
+  try {
+    if (req.method === "POST") {
+      if (_.get(req, "body.error")) {
+        res.render("razorpay/response", {
+          responseData: {
+            _status: "fail",
+            _message: _.get(req, "body.error", {}) || {}
+          }
+        });
+      } else {
+        // const generated_signature = SHA256(req.body.razorpay_order_id + "|" + req.body.razorpay_payment_id, config.get('RAZORPAY_KEY_SECRET'))
+        console.log("generated_signature", generated_signature);
+        res.render("razorpay/response", {
+          responseData: {
+            _status: "success",
+            _message: _.get(req, "body", {}) || {}
+          }
+        });
+      }
+    } else {
+      res.render("razorpay/response", {
+        responseData: {
+          _status: "cancel"
+        }
+      });
+    }
+  } catch (err) {
+    res.render("razorpay/response", {
+      responseData: {
+        _status: "fail"
+      }
+    });
+  }
+};
 // postPayPalTxn();
 module.exports = {
   postPaytmTxn,
   getPaytmTxnRes,
   postPayPalTxn,
-  getPayPalTxnRes
+  getPayPalTxnRes,
+  postRazorPayTax,
+  getRazorPayTaxRes
 };

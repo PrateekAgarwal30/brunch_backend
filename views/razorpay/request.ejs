@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<!-- saved from url=(0039)file:///C:/Users/1021712/Desktop/a.html -->
+<html lang="en" style=" height: 100%;">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <style>
+        .body-container {
+            justify-content: center;
+            align-items: center;
+            display: flex;
+            height: 100%;
+            flex-direction: column;
+        }
+
+        .loader {
+            border: 16px ridge #3498db;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            -webkit-animation: spin 2s linear infinite;
+            /* Safari */
+            animation: spin 2s linear infinite;
+        }
+
+        /* Safari */
+        @-webkit-keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+            }
+
+            100% {
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body style="
+    height: 100%;margin:0px">
+    <div class="body-container">
+        <div class="loader"></div>
+        <div style="
+        padding: 20px;
+    ">
+            Processing, Please Wait..
+        </div>
+    </div>
+
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script>
+        var options = {
+            "key": "<%=responseData['key_id']%>", // Enter the Key ID generated from the Dashboard
+            "amount": "50000", // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise or INR 500.
+            "currency": "INR",
+            "name": "Acme Corp",
+            "description": "A Wild Sheep Chase is the third novel by Japanese author  Haruki Murakami",
+            "image": "https://brunch-prateek.herokuapp.com/public/success.png",
+            "order_id": "<%=responseData['order_id']%>",//This is a sample Order ID. Create an Order using Orders API. (https://razorpay.com/docs/payment-gateway/orders/integration/#step-1-create-an-order). Refer the Checkout form table given below
+            "prefill": {
+                "name": "Gaurav Kumar",
+                "email": "gaurav.kumar@example.com",
+                "contact": "9999999999"
+            },
+            "notes": {
+                "address": "note value"
+            },
+            "theme": {
+                "color": "#F37254"
+            },
+            "callback_url": "http://192.168.0.20:5000/api/txn/razorpay/status",
+            "redirect": true,
+            "modal": {
+                "ondismiss": function () {
+                    window.location.replace("http://192.168.0.20:5000/api/txn/razorpay/status?statusPath=cancelled");
+                }
+            }
+        };
+        const razorpay = new Razorpay(options);
+        razorpay.open();
+    </script>
+</body>
+
+</html>
