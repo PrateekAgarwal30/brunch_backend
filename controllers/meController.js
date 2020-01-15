@@ -3,7 +3,8 @@ const { Detail, validateUpdateDetails } = require("../models/detail");
 const { Address, validateAddress } = require("../models/addresses");
 const _ = require("lodash");
 const Fawn = require("fawn");
-
+const sharp = require("sharp");
+var fs = require("fs");
 const getUserDetails = async (req, res) => {
   try {
     // console.log(req.userId);
@@ -105,11 +106,28 @@ const postUserImage = async (req, res) => {
     return res.status(400).send(response);
   } else {
     try {
-      var fileName = _.get(avatarFile, "filename");
+      var type = avatarFile.mimetype === "image/png" ? "png" : "jpg";
+      const userImageUrl = `${avatarFile.path}_hr.${type}`;
+      const userImageThumbnail = `${avatarFile.path}_tn.${type}`;
+      sharp(avatarFile.path)
+        .resize(400, 400)
+        .toFile(userImageThumbnail, (err, info) => {
+          console.log(err, info);
+        })
+        .resize(1000, 1000)
+        .toFile(userImageUrl, (err, info) => {
+          fs.unlink(avatarFile.path, function(err) {
+            if (err) throw err;
+            // if no error, file has been deleted successfully
+            console.log("File deleted!");
+          });
+        });
+
       let user = await User.findById(req.userId).select("details");
       if (user.details) {
         let details = await Detail.findById(user.details);
-        details.userImageUrl = `/uploads/avatars/${fileName}`;
+        details.userImageUrl = userImageUrl;
+        details.userImageThumbnail = userImageThumbnail;
         await details.save();
         res.status(200).send({
           _status: "success",

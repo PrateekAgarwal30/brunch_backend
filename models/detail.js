@@ -49,6 +49,9 @@ const detailSchema = new mongoose.Schema({
   userImageUrl: {
     type: String
   },
+  userImageThumbnail: {
+    type: String
+  },
   pushNotifToken: {
     type: String
   }
