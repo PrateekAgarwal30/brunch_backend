@@ -107,22 +107,16 @@ const postUserImage = async (req, res) => {
   } else {
     try {
       var type = avatarFile.mimetype === "image/png" ? "png" : "jpg";
-      const userImageUrl = `${avatarFile.path}_hr.${type}`;
-      const userImageThumbnail = `${avatarFile.path}_tn.${type}`;
+      const userImageUrl = `${avatarFile.path}`;
+      const userImageThumbnail = `${avatarFile.path.replace(
+        `.${type}`,
+        ""
+      )}_tn.${type}`;
       sharp(avatarFile.path)
-        .resize(400, 400)
+        .resize(200, 200)
         .toFile(userImageThumbnail, (err, info) => {
           console.log(err, info);
-        })
-        .resize(1000, 1000)
-        .toFile(userImageUrl, (err, info) => {
-          fs.unlink(avatarFile.path, function(err) {
-            if (err) throw err;
-            // if no error, file has been deleted successfully
-            console.log("File deleted!");
-          });
         });
-
       let user = await User.findById(req.userId).select("details");
       if (user.details) {
         let details = await Detail.findById(user.details);
