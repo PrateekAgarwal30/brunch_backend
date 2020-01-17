@@ -17,6 +17,11 @@ const mealSchema = new mongoose.Schema({
     enum: ["Veg", "NonVeg"],
     required: true
   },
+  mealType: {
+    type: String,
+    enum: ["Meal", "AddOn"],
+    required: true
+  },
   price: {
     type: Number,
     min: 1,
@@ -33,8 +38,16 @@ const mealSchema = new mongoose.Schema({
     minlength: 5,
     maxlength: 150
   },
-  image: {
+  mealImageUrl: {
     type: String,
+    required: true
+  },
+  mealThumbnailUrl: {
+    type: String,
+    required: true
+  },
+  quantityAvailable: {
+    type: Number,
     required: true
   }
 });
@@ -53,6 +66,9 @@ function validateMeal(meal) {
     type: Joi.string()
       .valid("Veg", "NonVeg")
       .required(),
+    mealType: Joi.string()
+      .valid("Meal", "AddOn")
+      .required(),
     price: Joi.number()
       .positive()
       .required(),
@@ -63,7 +79,9 @@ function validateMeal(meal) {
       .min(5)
       .max(150)
       .required(),
-    image: Joi.string().required()
+    mealImageUrl: Joi.string().required(),
+    mealThumbnailUrl: Joi.string().required(),
+    quantityAvailable:Joi.number().required()
   };
   return Joi.validate(meal, schema);
 }
