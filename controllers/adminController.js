@@ -1,11 +1,16 @@
+const _ = require("lodash");
+const Fawn = require("fawn");
+const sharp = require("sharp");
+const fs = require("fs");
 const {
   TechParkAddress,
   validateTechParkAddress,
   validateLocation,
   StallLocation
 } = require("../models/tech_parks");
-const _ = require("lodash");
-const Fawn = require("fawn");
+
+const { Meal, validateMeal } = require("../models/meals");
+
 const postNewTechPark = async (req, res) => {
   try {
     console.log("Post - Tech Address");
@@ -82,7 +87,73 @@ const postNewStallLocationForTechPark = async (req, res) => {
     });
   }
 };
+
+const postNewMeal = async (req, res) => {
+  try {
+    console.log("Post - New Meal");
+    var type =
+      _.get(req, "file.mimetype", "image/png") === "image/png" ? "png" : "jpg";
+    var mealImageUrl = _.get(req, "file.path", null) || null;
+    var mealThumbnailUrl = `${(_.get(req, "file.path", "") || "").replace(
+      `.${type}`,
+      ""
+    )}_tn.${type}`;
+    if (!mealImageUrl) {
+      return res.status(400).send({
+        _status: "fail",
+        _message: "Meal Image not passed.\nPlease select png/jpg file only."
+      });
+    }
+    let mealDeatils = _.pick(req.body, [
+      "name",
+      "status",
+      "type",
+      "mealType",
+      "price",
+      "subtitle",
+      "body",
+      "quantityAvailable"
+    ]);
+    mealDeatils["mealImageUrl"] = mealImageUrl;
+    mealDeatils["mealThumbnailUrl"] = mealThumbnailUrl;
+    let { error } = validateMeal(mealDeatils);
+    if (error) {
+      await fs.unlink(mealImageUrl, err => {
+        console.log(`${mealImageUrl} couldn't be deleted`);
+      });
+      return res.status(400).send({
+        _status: "fail",
+        _message: error.details[0].message
+      });
+    }
+    sharp(mealImageUrl)
+      .resize(200, 200)
+      .toFile(mealThumbnailUrl, (err, info) => {
+        console.log(err, info);
+      });
+    const newMeal = new Meal({
+      ...mealDeatils
+    });
+    await newMeal.save();
+    res.status(200).send({
+      _status: "success",
+      _data: { newMeal }
+    });
+  } catch (ex) {
+    if (mealImageUrl) {
+      await fs.unlink(mealImageUrl, err => {
+        console.log(`${mealImageUrl} couldn't be deleted`);
+      });
+    }
+    res.status(400).send({
+      _status: "fail",
+      _message: ex.message
+    });
+  }
+};
+
 module.exports = {
   postNewTechPark,
-  postNewStallLocationForTechPark
+  postNewStallLocationForTechPark,
+  postNewMeal
 };
