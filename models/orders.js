@@ -40,6 +40,19 @@ const orderSchema = new mongoose.Schema({
     min: 1,
     required: true
   },
+  shippingAddress: {
+    type: Object,
+    required: true,
+    validate: {
+      validator: function(v) {
+        return (
+          mongoose.Types.ObjectId.isValid(v.tech_park_id) &&
+          mongoose.Types.ObjectId.isValid(v.stall_loc_id)
+        );
+      },
+      message: "Invalid Shipping Address"
+    }
+  },
   orderNote: {
     type: String
   }
@@ -71,6 +84,12 @@ function validateOrder(order) {
     transactionAmount: Joi.number()
       .min(1)
       .required(),
+    shippingAddress: Joi.object()
+      .keys({
+        tech_park_id: Joi.string().required(),
+        stall_loc_id: Joi.string().required()
+      })
+      .with("tech_park_id", "stall_loc_id"),
     orderNote: Joi.string()
   };
   return Joi.validate(meal, schema);
