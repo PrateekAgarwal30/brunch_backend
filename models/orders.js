@@ -37,7 +37,7 @@ const orderSchema = new mongoose.Schema({
   },
   transactionAmount: {
     type: Number,
-    min: 1,
+    min: 1.0,
     required: true
   },
   shippingAddress: {

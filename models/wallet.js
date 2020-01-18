@@ -9,10 +9,10 @@ const walletSchema = new mongoose.Schema({
   walletBalance: {
     type: Number,
     required: true,
-    default: 0
+    default: 0.0
   },
   transactions: {
-    type: [Object.Schema.Types.ObjectId],
+    type: [mongoose.Schema.Types.ObjectId],
     default: [],
     ref: "transactions"
   }

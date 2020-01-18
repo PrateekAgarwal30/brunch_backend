@@ -5,6 +5,7 @@ const {
   changePasswordValidation
 } = require("../models/user");
 const { Detail } = require("../models/detail");
+const { Wallet } = require("../models/wallet");
 const mongoose = require("mongoose");
 const Fawn = require("fawn");
 Fawn.init(mongoose);
@@ -120,10 +121,16 @@ const registerUser = async (req, res) => {
     const token = user.generateAuthToken();
     console.log(token);
     const detail = new Detail(_.pick(req.body, ["email"]));
+    const wallet = new Wallet({
+      userId: user._id,
+      walletBalance: 0.01
+    });
     user.details = detail._id;
+    user.wallet = wallet._id;
     Fawn.Task()
       .save("users", user)
       .save("details", detail)
+      .save("wallets", wallet)
       .run()
       .then(result => {
         return res
