@@ -36,7 +36,12 @@ const getMeals = async (req, res) => {
     });
   }
 };
+
+const getColors =async (req,res) => {
+  res.render('colors');
+}
 module.exports = {
   getTechParks,
-  getMeals
+  getMeals,
+  getColors
 };
