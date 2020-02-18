@@ -10,6 +10,7 @@ const getUserDetails = async (req, res) => {
     // console.log(req.userId);
     let user = await User.findById(req.userId, "-__v -password")
       .populate("details", "-__v -_id")
+      .populate("wallet", "-__v -_id")
       .populate({
         path: "addresses",
         model: "addresses",
