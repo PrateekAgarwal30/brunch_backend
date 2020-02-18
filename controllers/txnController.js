@@ -4,6 +4,7 @@ const checksum_lib = require("../utils/paytm/checksum");
 const { pushNotificationForUser } = require("../utils/expo_push_notification");
 const { User } = require("../models/user");
 const { Detail } = require("../models/detail");
+const { Wallet } = require("../models/wallet");
 const moment = require("moment");
 const paypal = require("paypal-rest-sdk");
 const Razorpay = require("razorpay");
@@ -67,12 +68,12 @@ const getPaytmTxnRes = async (req, res) => {
       try {
         const userId = _.get(req, "query.userId", null);
         if (userId) {
-          let user = await User.findById(userId).select("details");
+          let user = await User.findById(userId).select("details wallet");
           if (user.details) {
             let details = await Detail.findById(user.details);
             if (details["pushNotifToken"]) {
               await pushNotificationForUser(details["pushNotifToken"], {
-                title: "Order Placed Successfully!",
+                title: "Wallet Recharged Successfully!",
                 body: `Order #${
                   bodyData.ORDERID
                 } was placed successfully (${moment(
@@ -82,6 +83,11 @@ const getPaytmTxnRes = async (req, res) => {
                 sound: "default"
               });
             }
+          }
+          if (user.wallet) {
+            let wallet = await Wallet.findById(user.wallet);
+            wallet.walletBalance = (+wallet.walletBalance || 0.00) + (+bodyData.TXNAMOUNT);
+            wallet.save();
           }
         }
       } catch (error) {
