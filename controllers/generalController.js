@@ -3,7 +3,15 @@ const { TechParkAddress } = require("../models/tech_parks");
 const { Meal } = require("../models/meals");
 const getTechParks = async (req, res) => {
   try {
-    const addresses = await TechParkAddress.find().populate("stall_locations");
+    const query = { 
+      $regex: ".*" + (req.query.searchAddressQuery || "") + ".*",
+      $options:'i'
+    };
+    const addresses = await TechParkAddress.find({
+      $or: [{ techPark: query }, { address: query }, { company: query }]
+    })
+      .limit(3)
+      .populate("stall_locations");
     res.status(200).send({
       _status: "success",
       _data: addresses
@@ -37,9 +45,9 @@ const getMeals = async (req, res) => {
   }
 };
 
-const getColors =async (req,res) => {
-  res.render('colors');
-}
+const getColors = async (req, res) => {
+  res.render("colors");
+};
 module.exports = {
   getTechParks,
   getMeals,
