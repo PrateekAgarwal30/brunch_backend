@@ -6,10 +6,11 @@ const {User} = require("../models/user");
 const {Detail} = require("../models/detail");
 const {Wallet} = require("../models/wallet");
 const {Transaction} = require("../models/transactions");
-const {paytmTxnParser}  = require('../utils/txnParserUtil');
+const {paytmTxnParser, razorPayTxnParser}  = require('../utils/txnParserUtil');
 const moment = require("moment");
 const paypal = require("paypal-rest-sdk");
 const Razorpay = require("razorpay");
+const Fawn = require('fawn');
 const razorpay = new Razorpay({
     key_id: config.get("RAZORPAY_KEY_ID"),
     key_secret: config.get("RAZORPAY_KEY_SECRET")
@@ -70,13 +71,15 @@ const getPaytmTxnRes = async(req, res) => {
                         .select("details wallet");
                     if (user.wallet) {
                         let wallet = await Wallet.findById(user.wallet);
-                        wallet.walletBalance = (+ wallet.walletBalance || 0.00) + (+ bodyData.TXNAMOUNT);
+                        const walletBalance = (+ wallet.walletBalance || 0.00) + (+ bodyData.TXNAMOUNT);
                         let transaction = new Transaction(paytmTxnParser(bodyData));
                         transaction.walletId = user.wallet;
                         transaction.userId = userId;
                         transaction.status = 'Success';
-                        wallet.save();
-                        transaction.save();
+                        await Fawn.Task()
+                        .save("transactions", transaction)
+                        .update(wallet, { walletBalance:  walletBalance })
+                        .run();
                     }
                     if (user.details) {
                         let details = await Detail.findById(user.details);
@@ -250,11 +253,23 @@ const getRazorPayTaxRes = async(req, res) => {
                     const paymentDetails = await razorpay
                         .payments
                         .fetch(req.body.razorpay_payment_id);
-                    console.log(paymentDetails);
+                    // console.log(paymentDetails);
                     if (userId && paymentDetails) {
                         let user = await User
                             .findById(userId)
                             .select("details wallet");
+                        if (user.wallet) {
+                            let wallet = await Wallet.findById(user.wallet);
+                            const walletBalance = (+ wallet.walletBalance || 0.00) + (+ paymentDetails.amount / 100);
+                            let transaction = new Transaction(razorPayTxnParser(paymentDetails));
+                            transaction.walletId = user.wallet;
+                            transaction.userId = userId;
+                            transaction.status = 'Success';
+                            await Fawn.Task()
+                            .save("transactions", transaction)
+                            .update(wallet, { walletBalance:  walletBalance })
+                            .run();
+                        }
                         if (user.details) {
                             let details = await Detail.findById(user.details);
                             if (details["pushNotifToken"]) {
@@ -267,11 +282,6 @@ const getRazorPayTaxRes = async(req, res) => {
                                     sound: "default"
                                 });
                             }
-                        }
-                        if (user.wallet) {
-                            let wallet = await Wallet.findById(user.wallet);
-                            wallet.walletBalance = (+ wallet.walletBalance || 0.00) + (+ paymentDetails.amount / 100);
-                            wallet.save();
                         }
                     }
                 } catch (error) {
