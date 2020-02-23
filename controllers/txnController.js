@@ -5,6 +5,8 @@ const {pushNotificationForUser} = require("../utils/expo_push_notification");
 const {User} = require("../models/user");
 const {Detail} = require("../models/detail");
 const {Wallet} = require("../models/wallet");
+const {Transaction} = require("../models/transactions");
+const {paytmTxnParser}  = require('../utils/txnParserUtil');
 const moment = require("moment");
 const paypal = require("paypal-rest-sdk");
 const Razorpay = require("razorpay");
@@ -66,6 +68,16 @@ const getPaytmTxnRes = async(req, res) => {
                     let user = await User
                         .findById(userId)
                         .select("details wallet");
+                    if (user.wallet) {
+                        let wallet = await Wallet.findById(user.wallet);
+                        wallet.walletBalance = (+ wallet.walletBalance || 0.00) + (+ bodyData.TXNAMOUNT);
+                        let transaction = new Transaction(paytmTxnParser(bodyData));
+                        transaction.walletId = user.wallet;
+                        transaction.userId = userId;
+                        transaction.status = 'Success';
+                        wallet.save();
+                        transaction.save();
+                    }
                     if (user.details) {
                         let details = await Detail.findById(user.details);
                         if (details["pushNotifToken"]) {
@@ -78,11 +90,6 @@ const getPaytmTxnRes = async(req, res) => {
                                 sound: "default"
                             });
                         }
-                    }
-                    if (user.wallet) {
-                        let wallet = await Wallet.findById(user.wallet);
-                        wallet.walletBalance = (+ wallet.walletBalance || 0.00) + (+ bodyData.TXNAMOUNT);
-                        wallet.save();
                     }
                 }
             } catch (error) {

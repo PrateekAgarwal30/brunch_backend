@@ -31,6 +31,7 @@ const avatarUploadMiddleware = multer({
 });
 
 router.get("/", auth, meController.getUserDetails);
+router.get("/transactions", auth, meController.getUserTransactions);
 router.post("/details", auth, meController.postUserDetails);
 router.post(
   "/user_image",

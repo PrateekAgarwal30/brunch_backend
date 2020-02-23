@@ -1,6 +1,7 @@
 const { User } = require("../models/user");
 const { Detail, validateUpdateDetails } = require("../models/detail");
 const { Address, validateAddress } = require("../models/addresses");
+const { Transaction } = require("../models/transactions");
 const _ = require("lodash");
 const Fawn = require("fawn");
 const sharp = require("sharp");
@@ -37,6 +38,21 @@ const getUserDetails = async (req, res) => {
   }
 };
 
+const getUserTransactions = async (req, res) => {
+  console.log('getUserTransactions');
+  try {
+    let transactions = await Transaction.find({userId : req.userId});
+    res.status(200).send({
+      _status: "success",
+      _data: transactions
+    });
+  } catch (ex) {
+    res.status(400).send({
+      _status: "fail",
+      _message: ex.message
+    });
+  }
+};
 const postUserDetails = async (req, res) => {
   try {
     const mDetails = _.pick(req.body, [
@@ -209,5 +225,6 @@ module.exports = {
   postUserDetails,
   postUserImage,
   postUserNotifToken,
-  postUserAddress
+  postUserAddress,
+  getUserTransactions
 };

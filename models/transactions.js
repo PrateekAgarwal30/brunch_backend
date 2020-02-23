@@ -16,14 +16,12 @@ const txnSchema = new mongoose.Schema({
     enum: ["Success", "Failed", "Hold", "Refunded"],
     required: true
   },
-  extTxnId: {
+  gatewayTxnId: {
     type: String,
-    minlength: 8,
-    maxlength: 15,
     required: true,
     unique: true
   },
-  paymentMode: {
+  gatewayMode: {
     type: String,
     enum: ["Paytm", "Razorpay", "Paypal"],
     required: true
@@ -36,6 +34,33 @@ const txnSchema = new mongoose.Schema({
     type: Number,
     min: 1.0,
     required: true
+  },
+  currency: {
+    type: String,
+    enum: ["INR"],
+    required: true
+  },
+  orderId: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  paymentMode: {
+    type: String,
+    enum: ["WALLET", "NETBANKING", "UPI", "CREDITCARD", "DEBITCARD"],
+    required: true
+  },
+  bank: {
+    type: String
+  },
+  wallet: {
+    type: String
+  },
+  vpa: {
+    type: String
+  },
+  bankTxnId: {
+    type: String
   }
 });
 const Transaction = mongoose.model("transactions", txnSchema);
