@@ -41,7 +41,11 @@ const getUserDetails = async (req, res) => {
 const getUserTransactions = async (req, res) => {
   console.log('getUserTransactions');
   try {
-    let transactions = await Transaction.find({userId : req.userId});
+    let transactions = await Transaction.find({userId : req.userId},"-gatewayTxnId -userId -walletId",{
+      sort:{
+        transactionDate: -1 //Sort by Date Added DESC
+      }
+  });
     res.status(200).send({
       _status: "success",
       _data: transactions
