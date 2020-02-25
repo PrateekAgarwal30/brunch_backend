@@ -32,7 +32,7 @@ const paytmTxnParser = (txnData) => {
         "currency": txnData["CURRENCY"],
         "orderId": txnData["ORDERID"],
         "paymentMode": getStatardPaymentMode(txnData["PAYMENTMODE"]),
-        "transactionDate": moment(txnData["TXNDATE"]).format(),
+        "transactionDate": moment(txnData["TXNDATE"]).subtract(330,'minutes').format(),
         "bank": txnData["BANKNAME"] === 'WALLET'
             ? undefined
             : txnData["BANKNAME"],
@@ -41,7 +41,7 @@ const paytmTxnParser = (txnData) => {
         "wallet": txnData["BANKNAME"] === 'WALLET'
             ? "paytm"
             : undefined,
-        "vpa": txnData[""],
+        "vpa": txnData[""]
     }
     return data;
 }
