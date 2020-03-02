@@ -6,4 +6,5 @@ router.get("/techparks", generalController.getTechParks);
 router.get("/meals", generalController.getMeals);
 router.get("/meals/:_id", generalController.getMeals);
 router.get("/colors", generalController.getColors);
+router.post("/cart", generalController.postCartItems);
 module.exports = router;
