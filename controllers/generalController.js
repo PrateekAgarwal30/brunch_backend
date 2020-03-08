@@ -54,40 +54,53 @@ const postCartItems = async (req, res) => {
     const { cartItems } = req.body;
     const response = {
       cartItems: [],
-      priceDetails: []
+      priceDetails: {}
     };
     for (const cartItem of cartItems) {
       const mealData = await Meal.findById(
         cartItem.mealId,
         "-body -mealImageUrl"
       );
-      const meal = _.pick(mealData, [
-        "_id",
-        "name",
-        "status",
-        "type",
-        "mealType",
-        "price",
-        "quantityAvailable",
-        "mealThumbnailUrl"
-      ]);
-      if (
-        meal.quantityAvailable < cartItem.quantity ||
-        meal.status === "InActive"
-      ) {
-        response.cartItems.push({
-          ...meal,
-          disabled: true,
-          errMessage: "Out of Stock",
-          quantity: cartItem.quantity
-        });
-      } else {
-        response.cartItems.push({
-          ...meal,
-          quantity: cartItem.quantity,
-          itemTotalPrice: meal.price * cartItem.quantity
-        });
+      if (mealData) {
+        const meal = _.pick(mealData, [
+          "_id",
+          "name",
+          "status",
+          "type",
+          "mealType",
+          "price",
+          "quantityAvailable",
+          "mealThumbnailUrl"
+        ]);
+        if (
+          meal.quantityAvailable < cartItem.quantity ||
+          meal.status === "InActive"
+        ) {
+          response.cartItems.push({
+            ...meal,
+            disabled: true,
+            errMessage: "Out of Stock",
+            quantity: cartItem.quantity
+          });
+        } else {
+          response.cartItems.push({
+            ...meal,
+            quantity: cartItem.quantity,
+            itemTotalPrice: meal.price * cartItem.quantity
+          });
+        }
       }
+    }
+    const totalCartItemPrice = response.cartItems.reduce(
+      (accumulator, currentValue) => {
+        return accumulator + currentValue.itemTotalPrice;
+      },
+      0
+    );
+    if (totalCartItemPrice > 0) {
+      const taxAmount = +(totalCartItemPrice * 0.05 || 0).toFixed(2);
+      const totalCartPrice = +(totalCartItemPrice + taxAmount || 0).toFixed(2);
+      response.priceDetails = { totalCartItemPrice, taxAmount, totalCartPrice };
     }
     res.status(200).send({
       _status: "success",
