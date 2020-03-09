@@ -2,6 +2,14 @@ const _ = require("lodash");
 const Fawn = require("fawn");
 const sharp = require("sharp");
 const fs = require("fs");
+const path = require("path");
+const format = require("util").format;
+const { Storage: googleStorage } = require("@google-cloud/storage");
+const storage = new googleStorage({
+  projectId: "brunch-pvt-ltd",
+  keyFilename: path.join(__dirname, "../brunch-pvt-ltd-firebase-adminsdk.json")
+});
+const bucket = storage.bucket("brunch-pvt-ltd.appspot.com");
 const {
   TechParkAddress,
   validateTechParkAddress,
@@ -90,19 +98,10 @@ const postNewStallLocationForTechPark = async (req, res) => {
 
 const postNewMeal = async (req, res) => {
   try {
-    console.log("Post - New Meal");
-    var type =
-      _.get(req, "file.mimetype", "image/png") === "image/png" ? "png" : "jpg";
-    var mealImageUrl = _.get(req, "file.path", null) || null;
-    var mealThumbnailUrl = `${(_.get(req, "file.path", "") || "").replace(
-      `.${type}`,
-      ""
-    )}_tn.${type}`;
-    if (!mealImageUrl) {
-      return res.status(400).send({
-        _status: "fail",
-        _message: "Meal Image not passed.\nPlease select png/jpg file only."
-      });
+    if (!req.file) {
+      throw new Error(
+        "Meal Image not passed.\nPlease select png/jpg file only."
+      );
     }
     let mealDeatils = _.pick(req.body, [
       "name",
@@ -114,23 +113,26 @@ const postNewMeal = async (req, res) => {
       "body",
       "quantityAvailable"
     ]);
-    mealDeatils["mealImageUrl"] = mealImageUrl;
-    mealDeatils["mealThumbnailUrl"] = mealThumbnailUrl;
     let { error } = validateMeal(mealDeatils);
     if (error) {
-      await fs.unlink(mealImageUrl, err => {
-        console.log(`${mealImageUrl} couldn't be deleted`);
-      });
-      return res.status(400).send({
-        _status: "fail",
-        _message: error.details[0].message
-      });
+      throw new Error(error);
     }
-    sharp(mealImageUrl)
-      .resize(200, 200)
-      .toFile(mealThumbnailUrl, (err, info) => {
-        console.log(err, info);
-      });
+    const imageThumbBuffer = await sharp(req.file.buffer)
+      .resize(105, 75)
+      .png()
+      .toBuffer();
+    const imageThumbInfo = {
+      buffer: imageThumbBuffer,
+      mimetype: "image/png",
+      uploadFileName: `mealsThumbmail/meal_${Date.now()}`
+    };
+    const uploadThumbnailImageResponse = await uploadImageToStorage(
+      imageThumbInfo
+    );
+    req.file.uploadFileName = `meals/meal_${Date.now()}`;
+    const uploadImageResponse = await uploadImageToStorage(req.file);
+    mealDeatils["mealImageUrl"] = uploadImageResponse;
+    mealDeatils["mealThumbnailUrl"] = uploadThumbnailImageResponse;
     const newMeal = new Meal({
       ...mealDeatils
     });
@@ -140,11 +142,6 @@ const postNewMeal = async (req, res) => {
       _data: { newMeal }
     });
   } catch (ex) {
-    if (mealImageUrl) {
-      await fs.unlink(mealImageUrl, err => {
-        console.log(`${mealImageUrl} couldn't be deleted`);
-      });
-    }
     res.status(400).send({
       _status: "fail",
       _message: ex.message
@@ -152,6 +149,32 @@ const postNewMeal = async (req, res) => {
   }
 };
 
+const uploadImageToStorage = file => {
+  return new Promise((resolve, reject) => {
+    if (!file) {
+      reject(new Error("No image file"));
+    }
+    let fileUpload = bucket.file(file.uploadFileName);
+    const blobStream = fileUpload.createWriteStream({
+      metadata: {
+        contentType: file.mimetype
+      }
+    });
+    blobStream.on("error", error => {
+      console.log("error", error);
+      reject(new Error("Something is wrong! Unable to upload at the moment."));
+    });
+
+    blobStream.on("finish", () => {
+      const url = format(
+        `https://storage.googleapis.com/${bucket.name}/${fileUpload.name}`
+      );
+      resolve(url);
+    });
+
+    blobStream.end(file.buffer);
+  });
+};
 module.exports = {
   postNewTechPark,
   postNewStallLocationForTechPark,

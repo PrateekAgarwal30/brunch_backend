@@ -79,9 +79,9 @@ function validateMeal(meal) {
       .min(5)
       .max(150)
       .required(),
-    mealImageUrl: Joi.string().required(),
-    mealThumbnailUrl: Joi.string().required(),
-    quantityAvailable:Joi.number().required()
+    // mealImageUrl: Joi.string().required(),
+    // mealThumbnailUrl: Joi.string().required(),
+    quantityAvailable: Joi.number().required()
   };
   return Joi.validate(meal, schema);
 }
