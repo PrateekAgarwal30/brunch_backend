@@ -5,29 +5,15 @@ const auth = require("../middleware/auth");
 const meController = require("./../controllers/meController");
 
 const multer = require("multer");
-const storage = multer.diskStorage({
-  destination: function(req, file, cb) {
-    cb(null, "./uploads/avatars/");
-  },
-  filename: function(req, file, cb) {
-    let fileName = "";
-    let type = file.mimetype === "image/png" ? "png" : "jpg";
-    if (file.mimetype === "image/png" || file.mimetype === "image/jpeg") {
-      fileName = `${req.userId}_${Date.now().toString()}.${type}`;
-      cb(null, fileName);
-    } else {
-      cb(null, null);
-    }
-  }
-});
 
-const fileFilter = function(req, file, cb) {
+const avatarFileFilter = function(req, file, cb) {
   console.log("FileFilter - file", file);
   cb(null, file.mimetype === "image/png" || file.mimetype === "image/jpeg");
 };
+
 const avatarUploadMiddleware = multer({
-  storage: storage,
-  fileFilter: fileFilter
+  storage: multer.memoryStorage(),
+  fileFilter: avatarFileFilter
 });
 
 router.get("/", auth, meController.getUserDetails);

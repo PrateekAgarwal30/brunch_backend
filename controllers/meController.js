@@ -5,7 +5,7 @@ const { Transaction } = require("../models/transactions");
 const _ = require("lodash");
 const Fawn = require("fawn");
 const sharp = require("sharp");
-var fs = require("fs");
+const uploadImageToStorage = require("../utils/uploadImageToStorage");
 const getUserDetails = async (req, res) => {
   try {
     // console.log(req.userId);
@@ -39,13 +39,17 @@ const getUserDetails = async (req, res) => {
 };
 
 const getUserTransactions = async (req, res) => {
-  console.log('getUserTransactions');
+  console.log("getUserTransactions");
   try {
-    let transactions = await Transaction.find({userId : req.userId},"-gatewayTxnId -userId -walletId",{
-      sort:{
-        transactionDate: -1 //Sort by Date Added DESC
+    let transactions = await Transaction.find(
+      { userId: req.userId },
+      "-gatewayTxnId -userId -walletId",
+      {
+        sort: {
+          transactionDate: -1 //Sort by Date Added DESC
+        }
       }
-  });
+    );
     res.status(200).send({
       _status: "success",
       _data: transactions
@@ -117,46 +121,44 @@ const postUserDetails = async (req, res) => {
 };
 
 const postUserImage = async (req, res) => {
-  const avatarFile = _.get(req, "file", null) || null;
-  var response;
-  if (!avatarFile) {
-    response = {
-      _status: "fail",
-      _message: "Unsupported file."
-    };
-    return res.status(400).send(response);
-  } else {
-    try {
-      var type = avatarFile.mimetype === "image/png" ? "png" : "jpg";
-      const userImageUrl = `${avatarFile.path}`;
-      const userImageThumbnail = `${avatarFile.path.replace(
-        `.${type}`,
-        ""
-      )}_tn.${type}`;
-      sharp(avatarFile.path)
-        .resize(200, 200)
-        .toFile(userImageThumbnail, (err, info) => {
-          console.log(err, info);
-        });
-      let user = await User.findById(req.userId).select("details");
-      if (user.details) {
-        let details = await Detail.findById(user.details);
-        details.userImageUrl = userImageUrl;
-        details.userImageThumbnail = userImageThumbnail;
-        await details.save();
-        res.status(200).send({
-          _status: "success",
-          _data: details
-        });
-        return res.status(200).send(response);
-      }
-    } catch (err) {
-      response = {
-        _status: "fail",
-        _message: err.message
-      };
-      return res.status(400).send(response);
+  try {
+    const avatarFile = _.get(req, "file", null) || null;
+    if (!avatarFile) {
+      throw new Error(
+        "Avatar Image not passed.\nPlease select png/jpg file only."
+      );
     }
+    let user = await User.findById(req.userId).select("details");
+    if (!user.details) {
+      throw new Error("User not found.\nPlease login again.");
+    }
+    const imageThumbBuffer = await sharp(req.file.buffer)
+      .resize(200, 200)
+      .png()
+      .toBuffer();
+    const imageThumbInfo = {
+      buffer: imageThumbBuffer,
+      mimetype: "image/png",
+      uploadFileName: `avatarsThumbmail/avatar_${Date.now()}`
+    };
+    req.file.uploadFileName = `avatars/avatar_${Date.now()}`;
+    const uploadThumbnailImageResponse = await uploadImageToStorage(
+      imageThumbInfo
+    );
+    const uploadImageResponse = await uploadImageToStorage(req.file);
+    let details = await Detail.findById(user.details);
+    details.userImageUrl = uploadImageResponse;
+    details.userImageThumbnail = uploadThumbnailImageResponse;
+    await details.save();
+    res.status(200).send({
+      _status: "success",
+      _data: details
+    });
+  } catch (ex) {
+    res.status(400).send({
+      _status: "fail",
+      _message: ex.message
+    });
   }
 };
 
